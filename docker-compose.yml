@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: olxbackend_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    ports:
+      - "80:80"
+    networks:
+      - olxbackend_network
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:5.7
+    container_name: olxbackend_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: olxbackend
+      MYSQL_USER: olxbackend
+      MYSQL_PASSWORD: olxbackend
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - olxbackend_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: olxbackend_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: olxbackend_mysql
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8080:80"
+    networks:
+      - olxbackend_network
+
+networks:
+  olxbackend_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
